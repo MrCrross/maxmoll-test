@@ -7,19 +7,20 @@ use App\Http\Requests\Warehouses\WarehousesDatatableRequest;
 use App\Http\Services\Warehouses\WarehousesService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class WarehousesController extends Controller
 {
     /**
      * @param WarehousesDatatableRequest $request
      * @param WarehousesService $warehousesService
-     * @return JsonResponse
+     * @return JsonResource
      */
     public function datatable(
         WarehousesDatatableRequest $request,
         WarehousesService $warehousesService
-    ): JsonResponse {
-        return response()->json($warehousesService->datatable($request));
+    ): JsonResource {
+        return $warehousesService->datatable($request);
     }
 
     /**

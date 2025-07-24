@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Services\Auth\AuthService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
@@ -15,26 +16,26 @@ class AuthController extends Controller
     /**
      * @param RegisterRequest $request
      * @param AuthService $authService
-     * @return JsonResponse
+     * @return JsonResource
      */
     public function register(
         RegisterRequest $request,
         AuthService $authService
-    ): JsonResponse {
-        return response()->json($authService->register($request));
+    ): JsonResource {
+        return $authService->register($request);
     }
 
     /**
      * @param LoginRequest $request
      * @param AuthService $authService
-     * @return JsonResponse
+     * @return JsonResource
      * @throws JsonErrorException
      */
     public function login(
         LoginRequest $request,
         AuthService $authService
-    ): JsonResponse {
-        return response()->json($authService->login($request));
+    ): JsonResource {
+        return$authService->login($request);
     }
 
     /**
@@ -47,12 +48,12 @@ class AuthController extends Controller
 
     /**
      * @param AuthService $authService
-     * @return JsonResponse
+     * @return JsonResource
      */
     public function refresh(
         AuthService $authService
-    ): JsonResponse {
-        return response()->json($authService->authTokenRefresh());
+    ): JsonResource {
+        return $authService->authTokenRefresh();
     }
 
     /**

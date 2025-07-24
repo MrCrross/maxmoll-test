@@ -10,6 +10,13 @@ use App\Http\Services\Warehouses\HistoryStocksService;
 
 class OrdersStocksService
 {
+    public function __construct(
+        private stocksRepository $stocksRepository = new StocksRepository(),
+        private HistoryStocksService $historyStocksService = new HistoryStocksService()
+    )
+    {
+    }
+
     /**
      * @param int $orderId
      * @param int $warehouseId
@@ -17,8 +24,11 @@ class OrdersStocksService
      * @return void
      * @throws OrderLargeStockException
      */
-    public function checkAndReduceStock(int $orderId, int $warehouseId, array $products): void
-    {
+    public function checkAndReduceStock(
+        int $orderId,
+        int $warehouseId,
+        array $products
+    ): void {
         $this->checkProductsInWarehouse($warehouseId, $products);
         $this->reduceFromStock($orderId, $warehouseId, $products);
     }
@@ -26,13 +36,19 @@ class OrdersStocksService
     /**
      * @param int $warehouseId
      * @param array $products - [$productId => $orderCount]
+     * @param ProductsRepository $productsRepository
+     * @param WarehousesRepository $warehousesRepository
      * @return void
      * @throws OrderLargeStockException
      */
-    public function checkProductsInWarehouse(int $warehouseId, array $products): void
-    {
+    public function checkProductsInWarehouse(
+        int $warehouseId,
+        array $products,
+        ProductsRepository $productsRepository = new ProductsRepository(),
+        WarehousesRepository $warehousesRepository = new WarehousesRepository()
+    ): void {
         $productsIds = array_keys($products);
-        $productsStocks = StocksRepository::getStocksProducts($warehouseId, $productsIds)->toArray();
+        $productsStocks = $this->stocksRepository->getStocksProducts($warehouseId, $productsIds)->toArray();
         foreach ($products as $productId => $count) {
             if (
                 !isset($productsStocks[$productId]) ||
@@ -40,8 +56,8 @@ class OrdersStocksService
             ) {
                 throw new OrderLargeStockException(
                     $productsStocks[$productId] ?? 0,
-                    ProductsRepository::getById($productId),
-                    WarehousesRepository::getById($warehouseId)
+                    $productsRepository->getById($productId),
+                    $warehousesRepository->getById($warehouseId)
                 );
             }
         }
@@ -53,12 +69,15 @@ class OrdersStocksService
      * @param array $products - [$productId => $productCount]
      * @return void
      */
-    public function reduceFromStock(int $orderId, int $warehouseId, array $products): void
-    {
+    public function reduceFromStock(
+        int $orderId,
+        int $warehouseId,
+        array $products
+    ): void {
         foreach ($products as $productId => $count) {
-            StocksRepository::reduceStock($warehouseId, $productId, $count);
+            $this->stocksRepository->reduceStock($warehouseId, $productId, $count);
         }
-        HistoryStocksService::create($orderId, $warehouseId, $products, false);
+        $this->historyStocksService->create($orderId, $warehouseId, $products, false);
     }
 
     /**
@@ -67,11 +86,14 @@ class OrdersStocksService
      * @param array $products - [$productId => $productCount]
      * @return void
      */
-    public function returnInStock(int $orderId, int $warehouseId, array $products): void
-    {
+    public function returnInStock(
+        int $orderId,
+        int $warehouseId,
+        array $products
+    ): void {
         foreach ($products as $productId => $count) {
-            StocksRepository::returnStock($warehouseId, $productId, $count);
+            $this->stocksRepository->returnStock($warehouseId, $productId, $count);
         }
-        HistoryStocksService::create($orderId, $warehouseId, $products);
+        $this->historyStocksService->create($orderId, $warehouseId, $products);
     }
 }

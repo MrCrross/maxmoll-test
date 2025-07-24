@@ -10,6 +10,12 @@ use Illuminate\Support\Carbon;
 
 class HistoryStocksService
 {
+    public function __construct(
+        private HistoryStocksRepository $historyStocksRepository = new HistoryStocksRepository(),
+    )
+    {
+    }
+
     /**
      * @param Request $request
      * @return JsonResource
@@ -21,7 +27,7 @@ class HistoryStocksService
         $dateEnd = $request->query('date_end', '');
         $warehousesIds = $request->query('warehouses', []);
         $productsIds = $request->query('products', []);
-        $datatable = HistoryStocksRepository::datatable(
+        $datatable = $this->historyStocksRepository->datatable(
             count: $count,
             dateStart: $dateStart,
             dateEnd: $dateEnd,
@@ -39,7 +45,7 @@ class HistoryStocksService
      * @param bool $add
      * @return void
      */
-    public static function create(int $orderId, int $warehouseId, array $products, bool $add = true): void
+    public function create(int $orderId, int $warehouseId, array $products, bool $add = true): void
     {
         $fields = [];
         $symbol = $add ? '+' : '-';
@@ -54,6 +60,6 @@ class HistoryStocksService
             ];
         }
 
-        HistoryStocksRepository::create($fields);
+        $this->historyStocksRepository->create($fields);
     }
 }

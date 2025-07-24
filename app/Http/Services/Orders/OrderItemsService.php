@@ -7,6 +7,12 @@ use App\Http\Repositories\Orders\OrderItemsRepository;
 
 class OrderItemsService
 {
+    public function __construct(
+        private OrderItemsRepository $orderItemsRepository = new OrderItemsRepository(),
+    )
+    {
+    }
+
     /**
      * @param int $orderId
      * @param array $products - [$productId => $orderCount]
@@ -24,23 +30,24 @@ class OrderItemsService
                 'count' => $count,
             ];
         }
-        OrderItemsRepository::insert($orderItemsFields);
+        $this->orderItemsRepository->insert($orderItemsFields);
     }
 
     /**
      * @param int $orderId
      * @param int $warehouseId
      * @param array $products
+     * @param OrdersStocksService $ordersStocksService
      * @return void
      * @throws OrderLargeStockException
      */
     public function changed(
         int $orderId,
         int $warehouseId,
-        array $products
+        array $products,
+        OrdersStocksService $ordersStocksService = new OrdersStocksService()
     ): void {
-        $ordersStocksService = new OrdersStocksService();
-        $orderItems = OrderItemsRepository::getByOrderId($orderId);
+        $orderItems = $this->orderItemsRepository->getByOrderId($orderId);
         $currentProducts = $orderItems->pluck('count', 'product_id')->toArray();
         [$createProducts, $updateProducts, $deleteProducts, $reduceFromStock, $returnInStock] = $this->getDiffProducts($currentProducts, $products);
         $ordersStocksService->checkAndReduceStock(
@@ -56,7 +63,7 @@ class OrderItemsService
         }
         if (!empty($updateProducts)) {
             foreach ($updateProducts as $productId => $count) {
-                OrderItemsRepository::updateByProductId(
+                $this->orderItemsRepository->updateByProductId(
                     orderId: $orderId,
                     productId: $productId,
                     fields: [
@@ -66,7 +73,7 @@ class OrderItemsService
             }
         }
         if (!empty($deleteProducts)) {
-            OrderItemsRepository::deleteByProductsIds($orderId, $deleteProducts);
+            $this->orderItemsRepository->deleteByProductsIds($orderId, $deleteProducts);
         }
     }
 

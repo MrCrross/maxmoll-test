@@ -15,7 +15,7 @@ class OrdersRepository
      * @param array $productsIds - массив ид товаров
      * @return Paginator
      */
-    public static function datatable(
+    public function datatable(
         int $count,
         string $customer = '',
         array $statuses = [],
@@ -54,7 +54,7 @@ class OrdersRepository
      * @param int $id
      * @return Order
      */
-    public static function getWithStocksById(int $id): Order
+    public function getWithStocksById(int $id): Order
     {
         return Order::query()
             ->select(
@@ -74,7 +74,7 @@ class OrdersRepository
      * @param int $id
      * @return Order|null
      */
-    public static function getById(int $id): Order|null
+    public function getById(int $id): Order|null
     {
         return Order::query()
             ->select(
@@ -92,7 +92,7 @@ class OrdersRepository
      * @param array $fields
      * @return Order
      */
-    public static function create(array $fields): Order
+    public function create(array $fields): Order
     {
         return Order::query()
             ->create($fields);
@@ -103,7 +103,7 @@ class OrdersRepository
      * @param array $fields
      * @return void
      */
-    public static function update(int $orderId, array $fields): void
+    public function update(int $orderId, array $fields): void
     {
         Order::query()
             ->where('id', '=', $orderId)

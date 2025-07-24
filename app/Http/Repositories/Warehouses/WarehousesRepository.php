@@ -13,7 +13,7 @@ class WarehousesRepository
      * @param string $term - строка для поиска
      * @return Paginator
      */
-    public static function datatable(int $count, string $term): Paginator
+    public function datatable(int $count, string $term): Paginator
     {
         return Warehouse::query()
                 ->select(
@@ -28,7 +28,7 @@ class WarehousesRepository
      * @param string $term - строка для поиска
      * @return Collection
      */
-    public static function autocomplete(string $term): Collection
+    public function autocomplete(string $term): Collection
     {
         return Warehouse::query()
             ->select('id as value', 'name as label')
@@ -37,7 +37,7 @@ class WarehousesRepository
             ->get();
     }
 
-    public static function getById(int $id): Warehouse
+    public function getById(int $id): Warehouse
     {
         return Warehouse::query()
             ->find(

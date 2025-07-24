@@ -9,6 +9,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class StocksService
 {
+    public function __construct(
+        private StocksRepository $stocksRepository = new StocksRepository(),
+    )
+    {
+    }
+
     /**
      * @param Request $request
      * @return JsonResource
@@ -17,7 +23,7 @@ class StocksService
     {
         $count = $request->query('page_count', 15);
         $search = $request->query('search', '');
-        $datatable = StocksRepository::datatable($count, $search);
+        $datatable = $this->stocksRepository->datatable($count, $search);
 
         return new StocksDatatableCollection($datatable, $count);
     }

@@ -11,7 +11,7 @@ class OrderItemsRepository
      * @param int $orderId
      * @return Collection
      */
-    public static function getByOrderId(int $orderId): Collection
+    public function getByOrderId(int $orderId): Collection
     {
         return OrderItem::query()
             ->select(
@@ -30,7 +30,7 @@ class OrderItemsRepository
      * @param array $fields
      * @return void
      */
-    public static function insert(array $fields): void
+    public function insert(array $fields): void
     {
         OrderItem::query()->insert($fields);
     }
@@ -41,7 +41,7 @@ class OrderItemsRepository
      * @param array $fields
      * @return void
      */
-    public static function updateByProductId(int $orderId, int $productId, array $fields): void
+    public function updateByProductId(int $orderId, int $productId, array $fields): void
     {
         OrderItem::query()
             ->where('order_id', '=', $orderId)
@@ -54,7 +54,7 @@ class OrderItemsRepository
      * @param array $productsIds
      * @return void
      */
-    public static function deleteByProductsIds(int $orderId, array $productsIds): void
+    public function deleteByProductsIds(int $orderId, array $productsIds): void
     {
         OrderItem::query()
             ->where('order_id', '=', $orderId)

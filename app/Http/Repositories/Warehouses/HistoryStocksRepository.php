@@ -15,7 +15,7 @@ class HistoryStocksRepository
      * @param array $productsIds
      * @return Paginator
      */
-    public static function datatable(
+    public function datatable(
         int $count,
         string $dateStart = '',
         string $dateEnd = '',
@@ -56,7 +56,7 @@ class HistoryStocksRepository
      * @param array $fields
      * @return void
      */
-    public static function create(array $fields): void
+    public function create(array $fields): void
     {
         HistoryStock::query()
             ->insert($fields);

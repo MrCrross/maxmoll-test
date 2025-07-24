@@ -10,7 +10,7 @@ class UsersRepository
      * @param array $fields
      * @return User
      */
-    public static function create(array $fields): User
+    public function create(array $fields): User
     {
         return User::query()->create($fields);
     }
@@ -19,7 +19,7 @@ class UsersRepository
      * @param string $email
      * @return User|null
      */
-    public static function getByEmail(string $email): User|null
+    public function getByEmail(string $email): User|null
     {
         return User::query()
             ->select(

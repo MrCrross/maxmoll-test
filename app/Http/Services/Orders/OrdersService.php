@@ -16,6 +16,12 @@ use Illuminate\Support\Carbon;
 
 class OrdersService
 {
+    public function __construct(
+        private OrdersRepository $ordersRepository = new OrdersRepository(),
+    )
+    {
+    }
+
     /**
      * @param Request $request
      * @return JsonResource
@@ -27,7 +33,7 @@ class OrdersService
         $statuses = $request->query('statuses', []);
         $warehousesIds = $request->query('warehouses', []);
         $productsIds = $request->query('products', []);
-        $datatable = OrdersRepository::datatable(
+        $datatable = $this->ordersRepository->datatable(
             count: $count,
             customer: $customer,
             statuses: $statuses,
@@ -40,12 +46,16 @@ class OrdersService
 
     /**
      * @param Request $request
+     * @param OrdersStocksService $ordersStocksService
+     * @param OrderItemsService $orderItemsService
      * @return JsonResource
      * @throws OrderLargeStockException
      */
-    public function create(Request $request): JsonResource
-    {
-        $ordersStocksService = new OrdersStocksService();
+    public function create(
+        Request $request,
+        OrdersStocksService $ordersStocksService = new OrdersStocksService(),
+        OrderItemsService $orderItemsService = new OrderItemsService()
+    ): JsonResource {
         $products = $this->productFormatting($request->post('products'));
         $ordersStocksService->checkProductsInWarehouse($request->post('warehouse_id'), $products);
         $orderFields = [
@@ -54,8 +64,8 @@ class OrdersService
             'created_at' => Carbon::now()->toDateTimeString(),
             'status' => OrderStatusEnum::Active->value,
         ];
-        $order = OrdersRepository::create($orderFields);
-        new OrderItemsService()->create(
+        $order = $this->ordersRepository->create($orderFields);
+        $orderItemsService->create(
             $order->id,
             $products
         );
@@ -65,7 +75,7 @@ class OrdersService
             $products
         );
 
-        return new OrdersResource(OrdersRepository::getWithStocksById($order->id));
+        return new OrdersResource($this->ordersRepository->getWithStocksById($order->id));
     }
 
     /**
@@ -78,7 +88,7 @@ class OrdersService
         Request $request,
         int $orderId
     ): JsonResource {
-        $order = OrdersRepository::getById($orderId);
+        $order = $this->ordersRepository->getById($orderId);
         $fields = [];
         if ($request->has('customer')) {
             $fields['customer'] = $request->post('customer');
@@ -91,26 +101,27 @@ class OrdersService
             );
         }
         if (!empty($fields)) {
-            OrdersRepository::update($orderId, $fields);
+            $this->ordersRepository->update($orderId, $fields);
         }
 
-        return new OrdersResource(OrdersRepository::getWithStocksById($orderId));
+        return new OrdersResource($this->ordersRepository->getWithStocksById($orderId));
     }
 
     /**
      * @param Request $request
      * @param int $orderId
+     * @param OrdersStatusService $orderStatusService
      * @return void
      * @throws OrderChangeOnActiveException
-     * @throws OrderLargeStockException
      * @throws OrderChangeOnCanceledException
      * @throws OrderChangeOnCompletedException
+     * @throws OrderLargeStockException
      */
     public function updateStatus(
         Request $request,
         int $orderId,
+        OrdersStatusService $orderStatusService = new OrdersStatusService()
     ): void {
-        $orderStatusService = new OrdersStatusService();
         switch ($request->post('status')) {
             case OrderStatusEnum::Active->value:
                 $orderStatusService->orderOnActive($orderId);

@@ -20,7 +20,7 @@ class AuthService
      */
     public function login(Request $request): JsonResource
     {
-        $user = UsersRepository::getByEmail($request->post('email'));
+        $user = new UsersRepository()->getByEmail($request->post('email'));
 
         if (
             is_null($user)
@@ -35,11 +35,13 @@ class AuthService
 
     /**
      * @param Request $request
+     * @param UsersService $usersService
      * @return JsonResource
      */
-    public function register(Request $request): JsonResource
-    {
-        $usersService = new UsersService();
+    public function register(
+        Request $request,
+        UsersService $usersService = new UsersService()
+    ): JsonResource {
         $user = $usersService->create($request);
         $token = Auth::login($user);
 

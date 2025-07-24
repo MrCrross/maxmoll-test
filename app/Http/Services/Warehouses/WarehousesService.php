@@ -10,6 +10,12 @@ use Illuminate\Support\Collection;
 
 class WarehousesService
 {
+    public function __construct(
+        private WarehousesRepository $warehousesRepository = new WarehousesRepository(),
+    )
+    {
+    }
+
     /**
      * @param Request $request
      * @return JsonResource
@@ -18,7 +24,7 @@ class WarehousesService
     {
         $count = $request->query('page_count', 15);
         $term = $request->query('term', '');
-        $datatable = WarehousesRepository::datatable($count, $term);
+        $datatable = $this->warehousesRepository->datatable($count, $term);
 
         return new WarehousesDatatableCollection($datatable, $count);
     }
@@ -29,6 +35,6 @@ class WarehousesService
      */
     public function autocomplete(Request $request): Collection
     {
-        return WarehousesRepository::autocomplete($request->query('term', ''));
+        return $this->warehousesRepository->autocomplete($request->query('term', ''));
     }
 }

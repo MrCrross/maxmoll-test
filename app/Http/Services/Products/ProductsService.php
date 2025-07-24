@@ -8,8 +8,14 @@ use Illuminate\Support\Collection;
 
 class ProductsService
 {
+    public function __construct(
+        private ProductsRepository $productsRepository = new ProductsRepository(),
+    )
+    {
+    }
+
     public function autocomplete(Request $request): Collection
     {
-        return ProductsRepository::autocomplete($request->query('term', ''));
+        return $this->productsRepository->autocomplete($request->query('term', ''));
     }
 }

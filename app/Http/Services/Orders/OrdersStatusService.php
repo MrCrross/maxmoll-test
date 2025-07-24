@@ -12,6 +12,12 @@ use Illuminate\Support\Carbon;
 
 class OrdersStatusService
 {
+    public function __construct(
+        private OrdersRepository $ordersRepository = new OrdersRepository(),
+    )
+    {
+    }
+
     /**
      * @param int $orderId
      * @return void
@@ -20,7 +26,7 @@ class OrdersStatusService
      */
     public function orderOnActive(int $orderId): void
     {
-        $order = OrdersRepository::getWithStocksById($orderId);
+        $order = $this->ordersRepository->getWithStocksById($orderId);
         switch ($order->status) {
             case OrderStatusEnum::Completed:
                 throw new OrderChangeOnActiveException();
@@ -38,7 +44,7 @@ class OrdersStatusService
                 );
                 break;
         }
-        OrdersRepository::update(
+        $this->ordersRepository->update(
             $orderId,
             [
                 'status' => OrderStatusEnum::Active->value,
@@ -54,7 +60,7 @@ class OrdersStatusService
      */
     public function orderOnCanceled(int $orderId): void
     {
-        $order = OrdersRepository::getWithStocksById($orderId);
+        $order = $this->ordersRepository->getWithStocksById($orderId);
         switch ($order->status) {
             case OrderStatusEnum::Completed:
                 throw new OrderChangeOnCanceledException();
@@ -67,7 +73,7 @@ class OrdersStatusService
                 new OrdersStocksService()->returnInStock($orderId, $order->warehouse_id, $orderProducts);
                 break;
         }
-        OrdersRepository::update(
+        $this->ordersRepository->update(
             $orderId,
             [
                 'status' => OrderStatusEnum::Canceled->value,
@@ -83,11 +89,11 @@ class OrdersStatusService
      */
     public function orderOnCompleted(int $orderId): void
     {
-        $order = OrdersRepository::getWithStocksById($orderId);
+        $order = $this->ordersRepository->getWithStocksById($orderId);
         if ($order->status === OrderStatusEnum::Canceled) {
             throw new OrderChangeOnCompletedException();
         }
-        OrdersRepository::update(
+        $this->ordersRepository->update(
             $orderId,
             [
                 'status' => OrderStatusEnum::Completed->value,

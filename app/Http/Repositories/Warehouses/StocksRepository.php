@@ -14,7 +14,7 @@ class StocksRepository
      * @param string $search
      * @return Paginator
      */
-    public static function datatable(
+    public function datatable(
         int $count,
         string $search
     ): Paginator {
@@ -35,7 +35,7 @@ class StocksRepository
             ->simplePaginate($count);
     }
 
-    public static function getStocksProducts(
+    public function getStocksProducts(
         int $warehouseId,
         array $productsIds
     ): Collection {
@@ -49,7 +49,7 @@ class StocksRepository
             ->pluck('stock', 'product_id');
     }
 
-    public static function reduceStock(
+    public function reduceStock(
         int $warehouseId,
         int $productId,
         int $reduceStock
@@ -60,7 +60,7 @@ class StocksRepository
             ->update(['stock' => DB::raw('stock - ' . $reduceStock)]);
     }
 
-    public static function returnStock(
+    public function returnStock(
         int $warehouseId,
         int $productId,
         int $returnStock

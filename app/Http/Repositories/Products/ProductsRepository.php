@@ -11,7 +11,7 @@ class ProductsRepository
      * @param string $term
      * @return Collection
      */
-    public static function autocomplete(string $term): Collection
+    public function autocomplete(string $term): Collection
     {
         return Product::query()
             ->select('id as value', 'name as label')
@@ -24,7 +24,7 @@ class ProductsRepository
      * @param int $id
      * @return Product|null
      */
-    public static function getById(int $id): Product|null
+    public function getById(int $id): Product|null
     {
         return Product::query()
             ->find(

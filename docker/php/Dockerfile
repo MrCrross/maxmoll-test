@@ -24,10 +24,6 @@ RUN apk add --no-cache g++
 RUN apk add --no-cache make
 RUN apk add --no-cache linux-headers
 
-# PostgreSQL клиент и зависимости для pdo_pgsql
-RUN apk add --no-cache postgresql-dev \
-    postgresql-client
-
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install intl
 RUN docker-php-ext-install pdo

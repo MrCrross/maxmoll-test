@@ -13,6 +13,13 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
+    public function __construct(
+        private UsersRepository $usersRepository,
+        private UsersService $usersService
+    )
+    {
+    }
+
     /**
      * @param Request $request
      * @return JsonResource
@@ -20,7 +27,7 @@ class AuthService
      */
     public function login(Request $request): JsonResource
     {
-        $user = new UsersRepository()->getByEmail($request->post('email'));
+        $user = $this->usersRepository->getByEmail($request->post('email'));
 
         if (
             is_null($user)
@@ -35,19 +42,20 @@ class AuthService
 
     /**
      * @param Request $request
-     * @param UsersService $usersService
      * @return JsonResource
      */
     public function register(
-        Request $request,
-        UsersService $usersService = new UsersService()
+        Request $request
     ): JsonResource {
-        $user = $usersService->create($request);
+        $user = $this->usersService->create($request);
         $token = Auth::login($user);
 
         return new AuthTokenResource((object)['token' => $token]);
     }
 
+    /**
+     * @return JsonResource
+     */
     public function authTokenRefresh(): JsonResource
     {
         return new AuthTokenResource((object)['token' => Auth::refresh()]);
